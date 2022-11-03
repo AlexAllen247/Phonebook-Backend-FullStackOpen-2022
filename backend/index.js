@@ -19,9 +19,11 @@ app.get("/api/persons", (_request, response, next) => {
 
 app.get("/info", (_request, response, next) => {
     Person.find({})
-    .then((persons) => {response.send(`<p>Phonebook has info for ${persons.length} people</p>
-    <p>${Date().toString()}</p>`)})
-    .catch((error) => next(error))
+        .then((persons) => {
+            response.send(`<p>Phonebook has info for ${persons.length} people</p>
+    <p>${Date().toString()}</p>`)
+        })
+        .catch((error) => next(error))
 })
 
 app.get("/api/persons/:id", (request, response, next) => {
@@ -40,11 +42,6 @@ app.delete("/api/persons/:id", (request, response, next) => {
 
 app.post("/api/persons", (request, response, next) => {
     const body = request.body
-
-    if (!body.name || !body.number) {
-        return response.status(400).json({ error: "Name or Number is missing!" })
-    }
-
     const person = new Person({
         name: body.name,
         number: body.number
@@ -58,8 +55,8 @@ app.put("/api/persons/:id", (request, response, next) => {
     const body = request.body
     const person = { number: body.number }
     Person.findByIdAndUpdate(request.params.id, person, { new: true })
-    .then((updatedPerson) => {response.json(updatedPerson)})
-    .catch((error) => next(error))
+        .then((updatedPerson) => { response.json(updatedPerson) })
+        .catch((error) => next(error))
 })
 
 const errorHandler = (error, _request, response, next) => {
@@ -67,6 +64,10 @@ const errorHandler = (error, _request, response, next) => {
 
     if (error.name === "CastError") {
         return response.status(400).send({ error: "Malformatted id" })
+    } else if (error.name === "ValidationError") {
+        return response.status(400).send({ error: error.message })
+    } else if (error.name === "MongoServerError" && error.code === 11000) {
+        return response.status(400).send({ error: "Person already exists!" })
     }
     next(error)
 }

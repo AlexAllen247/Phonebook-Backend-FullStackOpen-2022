@@ -40,7 +40,10 @@ const App = () => {
     const findPerson = persons.find((person) => { return (person.name === contactObject.name) })
 
     if (findPerson && findPerson.number === newNumber) {
-      alert(contactObject)
+      setMessage({
+        text: `${contactObject.name} already in phonebook`,
+        type: "error"
+      })
     } else if (findPerson && findPerson.number !== newNumber) {
       const confirmNumber = window.confirm(`${newName} is already added to the phonebook, do you want to replace the old number with a new one?`)
       if (confirmNumber) {
@@ -53,10 +56,16 @@ const App = () => {
             })
             setPersons(updatedPersonList)
             setPersonSearch(updatedPersonList)
-            setMessage(`Updated ${contactObject.name}`)
+            setMessage({
+              text: `Updated ${contactObject.name}`,
+              type: "message"
+            })
           })
           .catch((error) => {
-            setMessage(`Information of ${contactObject.name} has already been removed from the server`)
+            setMessage({
+              text: error.response.data.error,
+              type: "error"
+            })
           })
       }
     } else {
@@ -67,7 +76,17 @@ const App = () => {
           setPersonSearch(persons.concat(returnedContact))
           setNewName("")
           setNewNumber("")
-          setMessage(`Added ${contactObject.name}`)
+          setMessage({
+            text: `Added ${contactObject.name}`,
+            type: "message"
+          })
+        })
+        .catch((error) => {
+          console.log(error.response.data.error)
+          setMessage({
+            text: error.response.data.error,
+            type: "error"
+          })
         })
     }
   }
@@ -76,10 +95,14 @@ const App = () => {
     if (window.confirm(`Do you want to delete ${name}?`)) {
       contactService
         .remove(id)
-        .then((response) => {
+        .then((_response) => {
           const updatedList = persons.filter((person) => person.id !== id)
           setPersons(updatedList)
           setPersonSearch(updatedList)
+          setMessage({
+            text: `${name} removed from Phonebook`,
+            type: "message"
+          })
         })
     }
   }
