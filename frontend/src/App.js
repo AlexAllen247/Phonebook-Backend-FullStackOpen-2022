@@ -28,7 +28,7 @@ const App = () => {
   useEffect(() => {
     setTimeout(() => {
       setMessage(null)
-    }, 5000)
+    }, 7000)
   }, [message])
 
   const addContact = (event) => {
